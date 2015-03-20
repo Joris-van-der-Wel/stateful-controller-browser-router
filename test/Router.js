@@ -1,5 +1,5 @@
 'use strict';
-/* global describe, beforeEach, it */
+/* global describe, beforeEach, afterEach, it */
 
 var assert = require('assert');
 var Promise = require('bluebird');
@@ -1041,8 +1041,6 @@ describe('Router', function()
 
                 it('should not cause pushHistory to be called', function(done)
                 {
-                        var pushedState = false;
-
                         front.enterFoo = function()
                         {
                                 return Promise.reject(Error('quux'));
@@ -1051,7 +1049,6 @@ describe('Router', function()
                         router.enterStates(['foo'])
                         .catch(function(err)
                         {
-                                assert(!pushedState);
                                 assert(err.message, 'quux');
                                 assert.deepEqual(router.currentStateList, null);
                                 done();
@@ -1228,6 +1225,219 @@ describe('Router', function()
                                         assert.deepEqual(router.currentStateList, ['foo']);
                                 })
                         ).return(null).done(done);
+                });
+
+                it('should fire `transitionFailed`', function(done)
+                {
+                        var firedEvent = false;
+                        front.enterFoo = function()
+                        {
+                                return Promise.reject(Error('quux'));
+                        };
+
+                        router.on('transitionFailed', function(stateList, err)
+                        {
+                                assert.deepEqual(stateList, ['foo']);
+                                assert(err.message, 'quux');
+                                firedEvent = true;
+                        });
+
+                        router.enterStates(['foo'])
+                                .catch(function(err)
+                                {
+                                        assert(firedEvent);
+                                        done();
+                                });
+                });
+
+                it('should fire `transitionFailed` during upgradeInitialState', function(done)
+                {
+                        var firedEvent = false;
+                        front.enterFoo = function()
+                        {
+                                return Promise.reject(Error('quux'));
+                        };
+
+                        urlStateMap.fromURL = function(path)
+                        {
+                                if (path === '/foo')
+                                {
+                                        return ['foo'];
+                                }
+
+                                throw Error('Should not occur in this test case');
+                        };
+
+                        router.on('transitionFailed', function(stateList, err)
+                        {
+                                assert.deepEqual(stateList, ['foo']);
+                                assert(err.message, 'quux');
+                                firedEvent = true;
+                        });
+
+                        windowStub.location.pathname = '/foo';
+
+                        router.upgradeInitialState()
+                        .catch(function(err)
+                        {
+                                assert(firedEvent);
+                                done();
+                        });
+                });
+
+                it('should fire `transitionFailed` for queued transitions', function(done)
+                {
+                        var firedEvent = false;
+
+                        urlStateMap.toURL = function(states)
+                        {
+                                if (states.length === 1)
+                                {
+                                        switch(states[0])
+                                        {
+                                                case 'foo': return '/foo';
+                                                case 'bar': return '/bar';
+                                        }
+                                }
+
+                                throw Error('Should not occur in this test case');
+                        };
+
+                        windowStub.history.pushState = function(state, title, url)
+                        {
+                        };
+
+                        front.enterFoo = function(state, upgrade)
+                        {
+                                return Promise.delay(10);
+                        };
+
+                        front.enterBar = function(state, upgrade)
+                        {
+                                return Promise.reject(Error('quux'));
+                        };
+
+                        router.on('transitionFailed', function(stateList, err)
+                        {
+                                assert.deepEqual(stateList, ['bar']);
+                                assert(err.message, 'quux');
+                                firedEvent = true;
+                        });
+
+                        Promise.join(
+                                router.queueEnterStates(['foo'], true).then(function(val)
+                                {
+                                }),
+
+                                router.queueEnterStates(['bar']).catch(function(err)
+                                {
+                                        assert(firedEvent);
+                                })
+                        ).return(null).done(done);
+                });
+
+                it('should fire `transitionFailed` and `historyPopStateFailed` for popstate', function(done)
+                {
+                        var firedEvent = false;
+                        front.enterFoo = function()
+                        {
+                                return Promise.reject(Error('quux'));
+                        };
+
+                        urlStateMap.fromURL = function(path)
+                        {
+                                if (path === '/foo')
+                                {
+                                        return ['foo'];
+                                }
+
+                                throw Error('Should not occur in this test case');
+                        };
+
+                        var popStateEventHandler = null;
+
+                        windowStub.addEventListener = function(name, func)
+                        {
+                                assert.strictEqual(name, 'popstate');
+                                popStateEventHandler = func;
+                        };
+
+                        router.on('transitionFailed', function(stateList, err)
+                        {
+                                assert.deepEqual(stateList, ['foo']);
+                                assert(err.message, 'quux');
+                                firedEvent = true;
+                        });
+
+                        router.on('historyPopStateFailed', function(stateList, err)
+                        {
+                                assert.deepEqual(stateList, ['foo']);
+                                assert(err.message, 'quux');
+                                assert(firedEvent);
+                                done();
+                        });
+
+                        router.attachPopStateListener();
+
+                        popStateEventHandler({ state: {
+                                statefulControllerRouterUrl: {
+                                        url: '/foo'
+                                }
+                        }});
+                });
+
+                it('should fire `transitionFailed` and an unhandled rejection for popstate', function(done)
+                {
+                        var firedEvent = false;
+                        front.enterFoo = function()
+                        {
+                                return Promise.reject(Error('quux'));
+                        };
+
+                        urlStateMap.fromURL = function(path)
+                        {
+                                if (path === '/foo')
+                                {
+                                        return ['foo'];
+                                }
+
+                                throw Error('Should not occur in this test case');
+                        };
+
+                        var popStateEventHandler = null;
+
+                        windowStub.addEventListener = function(name, func)
+                        {
+                                assert.strictEqual(name, 'popstate');
+                                popStateEventHandler = func;
+                        };
+
+                        router.on('transitionFailed', function(stateList, err)
+                        {
+                                assert.deepEqual(stateList, ['foo']);
+                                assert(err.message, 'quux');
+                                firedEvent = true;
+                        });
+
+                        Promise.onPossiblyUnhandledRejection(function(err)
+                        {
+                                assert(err.message, 'quux');
+                                assert(firedEvent);
+                                done();
+                        });
+
+                        router.attachPopStateListener();
+
+                        popStateEventHandler({ state: {
+                                statefulControllerRouterUrl: {
+                                        url: '/foo'
+                                }
+                        }});
+                });
+
+                afterEach(function()
+                {
+                        Promise.onUnhandledRejectionHandled(null);
                 });
         });
 });
