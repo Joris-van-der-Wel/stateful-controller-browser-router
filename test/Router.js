@@ -295,7 +295,7 @@ describe('Router', function()
                                 assert(!enteredFoo);
                                 assert.strictEqual(state, 'foo');
                                 assert.strictEqual(upgrade, false);
-                                assert(!pushedState, 'pushStat/replaceState should occur after the state transition itself');
+                                assert(!pushedState, 'pushState/replaceState should occur after the state transition itself');
                                 enteredFoo = true;
                         };
                 });
@@ -413,7 +413,7 @@ describe('Router', function()
                                 assert(!enteredFoo);
                                 assert.strictEqual(state, 'foo');
                                 assert.strictEqual(upgrade, false);
-                                assert(!pushedState, 'pushStat/replaceState should occur after the state transition itself');
+                                assert(!pushedState, 'pushState/replaceState should occur after the state transition itself');
                                 enteredFoo = true;
                         };
                 });
