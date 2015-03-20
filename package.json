@@ -1,6 +1,6 @@
 {
   "name": "stateful-controller-browser-router",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A client-side router for stateful-controller using the history API",
   "main": "lib/Router.js",
   "scripts": {
