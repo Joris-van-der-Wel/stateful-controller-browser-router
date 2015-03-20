@@ -343,6 +343,7 @@ describe('Router', function()
 
                         router.on('transitionComplete', function(stateList, url)
                         {
+                                assert(!router.pending, 'Should not be pending during transitionComplete (unless there is another state queued)');
                                 assert.deepEqual(stateList, ['foo']);
                                 assert.strictEqual(url, '/foo/bar');
                                 assert.deepEqual(router.currentStateList, ['foo']);
@@ -745,6 +746,7 @@ describe('Router', function()
                                         assert.deepEqual(stateList, ['foo']);
                                         assert.strictEqual(url, '/foo');
                                         assert.deepEqual(router.currentStateList, ['foo']);
+                                        assert(router.pending, 'Should be pending, there is another state queued');
                                         ++firedEvent;
                                 }
                                 else if (firedEvent === 1)
@@ -752,6 +754,7 @@ describe('Router', function()
                                         assert.deepEqual(stateList, ['bar']);
                                         assert.strictEqual(url, '/bar');
                                         assert.deepEqual(router.currentStateList, ['bar']);
+                                        assert(!router.pending, 'Should not be pending during transitionComplete (unless there is another state queued)');
                                         ++firedEvent;
                                 }
                                 else
@@ -859,6 +862,7 @@ describe('Router', function()
 
                         router.on('transitionComplete', function(stateList, url)
                         {
+                                assert(!router.pending, 'Should not be pending during transitionComplete (unless there is another state queued)');
                                 assert.deepEqual(stateList, ['baz']);
                                 assert.strictEqual(url, '/qwerty');
                                 assert.deepEqual(router.currentStateList, ['baz']);
@@ -1237,17 +1241,18 @@ describe('Router', function()
 
                         router.on('transitionFailed', function(stateList, err)
                         {
+                                assert(!router.pending, 'Should not be pending during transitionFailed (unless there is another state queued)');
                                 assert.deepEqual(stateList, ['foo']);
                                 assert(err.message, 'quux');
                                 firedEvent = true;
                         });
 
                         router.enterStates(['foo'])
-                                .catch(function(err)
-                                {
-                                        assert(firedEvent);
-                                        done();
-                                });
+                        .catch(function(err)
+                        {
+                                assert(firedEvent);
+                                done();
+                        });
                 });
 
                 it('should fire `transitionFailed` during upgradeInitialState', function(done)
@@ -1270,6 +1275,7 @@ describe('Router', function()
 
                         router.on('transitionFailed', function(stateList, err)
                         {
+                                assert(!router.pending, 'Should not be pending during transitionFailed (unless there is another state queued)');
                                 assert.deepEqual(stateList, ['foo']);
                                 assert(err.message, 'quux');
                                 firedEvent = true;
@@ -1319,6 +1325,7 @@ describe('Router', function()
 
                         router.on('transitionFailed', function(stateList, err)
                         {
+                                assert(!router.pending, 'Should not be pending during transitionFailed (unless there is another state queued)');
                                 assert.deepEqual(stateList, ['bar']);
                                 assert(err.message, 'quux');
                                 firedEvent = true;
@@ -1364,6 +1371,7 @@ describe('Router', function()
 
                         router.on('transitionFailed', function(stateList, err)
                         {
+                                assert(!router.pending, 'Should not be pending during transitionFailed (unless there is another state queued)');
                                 assert.deepEqual(stateList, ['foo']);
                                 assert(err.message, 'quux');
                                 firedEvent = true;
@@ -1371,6 +1379,7 @@ describe('Router', function()
 
                         router.on('historyPopStateFailed', function(stateList, err)
                         {
+                                assert(!router.pending, 'Should not be pending during historyPopStateFailed (unless there is another state queued)');
                                 assert.deepEqual(stateList, ['foo']);
                                 assert(err.message, 'quux');
                                 assert(firedEvent);
@@ -1414,6 +1423,7 @@ describe('Router', function()
 
                         router.on('transitionFailed', function(stateList, err)
                         {
+                                assert(!router.pending, 'Should not be pending during transitionFailed (unless there is another state queued)');
                                 assert.deepEqual(stateList, ['foo']);
                                 assert(err.message, 'quux');
                                 firedEvent = true;
