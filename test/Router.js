@@ -130,6 +130,7 @@ describe('Router', function()
                                 assert(!enteredFoo);
                                 assert.strictEqual(state, 'foo');
                                 assert.strictEqual(upgrade, true);
+                                assert.deepEqual(router.currentStateList, null);
                                 enteredFoo = true;
                         };
 
@@ -137,6 +138,7 @@ describe('Router', function()
                         {
                                 assert(enteredFoo);
                                 assert.strictEqual(val, null);
+                                assert.deepEqual(router.currentStateList, ['foo']);
                         }).done(done);
                 });
 
@@ -171,12 +173,14 @@ describe('Router', function()
                                 assert.strictEqual(state, 'baz');
                                 assert.strictEqual(upgrade, true);
                                 enteredBaz = true;
+                                assert.deepEqual(router.currentStateList, null);
                         };
 
                         router.upgradeInitialState().then(function(val)
                         {
                                 assert(enteredBaz);
                                 assert.strictEqual(val, null);
+                                assert.deepEqual(router.currentStateList, ['baz']);
                         }).done(done);
                 });
 
@@ -223,6 +227,7 @@ describe('Router', function()
                                 assert.strictEqual(state, 'foo');
                                 assert.strictEqual(upgrade, false);
                                 assert(!pushedState, 'pushState should occur after the state transition itself');
+                                assert.deepEqual(router.currentStateList, null);
                                 enteredFoo = true;
 
                                 // Even though enterFoo takes a while, baz should remain queued
@@ -236,6 +241,7 @@ describe('Router', function()
                                 assert(enteredFoo);
                                 assert.strictEqual(state, 'baz');
                                 assert.strictEqual(upgrade, true);
+                                assert.deepEqual(router.currentStateList, ['foo']);
                                 enteredBaz = true;
                         };
 
@@ -248,6 +254,7 @@ describe('Router', function()
                                 assert(!enteredBaz);
                                 assert(pushedState, 'pushState should occur before the enter() promise resolves');
                                 assert.strictEqual(val, null);
+                                assert.deepEqual(router.currentStateList, ['foo']);
                         });
 
                         router.upgradeInitialState().then(function(val)
@@ -257,6 +264,7 @@ describe('Router', function()
                                 assert(enteredBaz);
                                 assert(pushedState);
                                 assert.strictEqual(val, null);
+                                assert.deepEqual(router.currentStateList, ['baz']);
                         }).done(done);
 
                         assert(router.pending);
@@ -296,6 +304,7 @@ describe('Router', function()
                                 assert.strictEqual(state, 'foo');
                                 assert.strictEqual(upgrade, false);
                                 assert(!pushedState, 'pushState/replaceState should occur after the state transition itself');
+                                assert.deepEqual(router.currentStateList, null);
                                 enteredFoo = true;
                         };
                 });
@@ -321,6 +330,7 @@ describe('Router', function()
                                 assert(enteredFoo);
                                 assert(pushedState);
                                 assert.strictEqual(val, null);
+                                assert.deepEqual(router.currentStateList, ['foo']);
                         }).done(done);
                 });
 
@@ -345,6 +355,7 @@ describe('Router', function()
                                 assert(enteredFoo);
                                 assert(pushedState);
                                 assert.strictEqual(val, null);
+                                assert.deepEqual(router.currentStateList, ['foo']);
                         }).done(done);
                 });
 
@@ -379,6 +390,7 @@ describe('Router', function()
                         {
                                 assert(enteredFoo);
                                 assert(caught);
+                                assert.deepEqual(router.currentStateList, ['foo']);
                         })
                         .return(null).done(done);
                 });
@@ -414,6 +426,7 @@ describe('Router', function()
                                 assert.strictEqual(state, 'foo');
                                 assert.strictEqual(upgrade, false);
                                 assert(!pushedState, 'pushState/replaceState should occur after the state transition itself');
+                                assert.deepEqual(router.currentStateList, null);
                                 enteredFoo = true;
                         };
                 });
@@ -439,6 +452,7 @@ describe('Router', function()
                                 assert(enteredFoo);
                                 assert(pushedState);
                                 assert.strictEqual(val, null);
+                                assert.deepEqual(router.currentStateList, ['foo']);
                         }).done(done);
                 });
 
@@ -502,6 +516,7 @@ describe('Router', function()
                                 assert.strictEqual(state, 'foo');
                                 assert.strictEqual(upgrade, false);
                                 assert.strictEqual(pushedState, 0, 'pushState should occur after the state transition itself');
+                                assert.deepEqual(router.currentStateList, null);
                                 enteredFoo = true;
 
                                 // Even though enterFoo takes a while, bar should remain queued
@@ -515,6 +530,7 @@ describe('Router', function()
                                 assert(enteredFoo);
                                 assert.strictEqual(state, 'bar');
                                 assert.strictEqual(upgrade, false);
+                                assert.deepEqual(router.currentStateList, ['foo']);
                                 enteredBar = true;
                         };
 
@@ -528,6 +544,7 @@ describe('Router', function()
                                         assert(!enteredBar);
                                         assert.strictEqual(pushedState, 1);
                                         assert.strictEqual(val, null);
+                                        assert.deepEqual(router.currentStateList, ['foo']);
                                 }),
 
                                 router.queueEnterStates(['bar']).then(function(val)
@@ -537,6 +554,7 @@ describe('Router', function()
                                         assert(enteredBar);
                                         assert.strictEqual(pushedState, 2);
                                         assert.strictEqual(val, null);
+                                        assert.deepEqual(router.currentStateList, ['bar']);
                                 })
                         ).return(null).done(done);
 
@@ -607,6 +625,7 @@ describe('Router', function()
                                 assert.strictEqual(state, 'foo');
                                 assert.strictEqual(upgrade, false);
                                 assert.strictEqual(pushedState, 0, 'pushState should occur after the state transition itself');
+                                assert.deepEqual(router.currentStateList, null);
                                 enteredFoo = true;
                         };
 
@@ -617,6 +636,7 @@ describe('Router', function()
                                 assert(enteredFoo);
                                 assert.strictEqual(state, 'bar');
                                 assert.strictEqual(upgrade, false);
+                                assert.deepEqual(router.currentStateList, ['foo']);
                                 enteredBar = true;
                         };
 
@@ -635,6 +655,7 @@ describe('Router', function()
                                         assert(!enteredBar);
                                         assert.strictEqual(pushedState, 1);
                                         assert.strictEqual(val, null);
+                                        assert.deepEqual(router.currentStateList, ['foo']);
                                 }),
 
                                 router.queueEnterStates(['baz']).then(function(val)
@@ -644,6 +665,7 @@ describe('Router', function()
                                         assert(!router.pending);
                                         assert(enteredFoo);
                                         assert(enteredBar);
+                                        assert.deepEqual(router.currentStateList, ['bar']);
                                 }),
 
                                 router.queueEnterStates(['bar']).then(function(val)
@@ -653,6 +675,7 @@ describe('Router', function()
                                         assert(enteredBar);
                                         assert.strictEqual(pushedState, 2);
                                         assert.strictEqual(val, null);
+                                        assert.deepEqual(router.currentStateList, ['bar']);
                                 })
                         ).return(null).done(done);
 
@@ -701,6 +724,7 @@ describe('Router', function()
                                 assert(!enteredBaz);
                                 assert.strictEqual(state, 'baz');
                                 assert.strictEqual(upgrade, false);
+                                assert.deepEqual(router.currentStateList, null);
                                 enteredBaz = true;
                         };
 
@@ -708,7 +732,11 @@ describe('Router', function()
                         {
                                 assert.deepEqual(stateList, ['baz']);
                                 assert.strictEqual(url, '/qwerty');
-                                promise.done(done);
+                                assert.deepEqual(router.currentStateList, null);
+                                promise.then(function()
+                                {
+                                        assert.deepEqual(router.currentStateList, ['baz']);
+                                }).done(done);
                         });
 
                         router.attachPopStateListener();
@@ -741,17 +769,22 @@ describe('Router', function()
                                 assert.strictEqual(state, 'baz');
                                 assert.strictEqual(upgrade, false);
                                 enteredBaz = true;
+                                assert.deepEqual(router.currentStateList, null);
                         };
 
                         router.on('historyPopState', function(stateList, url, promise)
                         {
                                 assert.deepEqual(stateList, ['baz']);
                                 assert.strictEqual(url, '/qwerty');
-                                promise.done(done);
+                                promise.then(function()
+                                {
+                                        assert.deepEqual(router.currentStateList, ['baz']);
+                                }).done(done);
                         });
 
                         windowStub.location.pathname = '/qwerty';
                         router.attachPopStateListener();
+                        assert.deepEqual(router.currentStateList, null);
                         assert(typeof popStateEventHandler === 'function');
 
                         popStateEventHandler({ state: null });
@@ -810,6 +843,7 @@ describe('Router', function()
 
                         router.replaceStateList(['foo']);
                         assert(replacedState);
+                        assert.deepEqual(router.currentStateList, ['foo']);
                 });
 
                 it('should wait for the pending transition to complete (and use pushState instead)', function(done)
@@ -837,6 +871,7 @@ describe('Router', function()
                                 assert.strictEqual(state, 'foo');
                                 assert.strictEqual(upgrade, false);
                                 assert(!pushedState, 'pushState should occur after the state transition itself');
+                                assert.deepEqual(router.currentStateList, null);
                                 enteredFoo = true;
                         };
 
@@ -846,6 +881,7 @@ describe('Router', function()
                                 assert(enteredFoo);
                                 assert(pushedState);
                                 assert.strictEqual(val, null);
+                                assert.deepEqual(router.currentStateList, ['bar']);
                         }).done(done);
 
                         router.replaceStateList(['bar']);
@@ -886,6 +922,7 @@ describe('Router', function()
                         {
                                 assert(!pushedState);
                                 assert(err.message, 'quux');
+                                assert.deepEqual(router.currentStateList, null);
                                 done();
                         });
                 });
@@ -959,6 +996,7 @@ describe('Router', function()
                                         assert(!enteredBar);
                                         assert.strictEqual(pushedState, 0);
                                         assert.strictEqual(err.message, 'quux');
+                                        assert.deepEqual(router.currentStateList, null);
                                 }),
 
                                 router.queueEnterStates(['bar']).then(function(val)
@@ -968,6 +1006,7 @@ describe('Router', function()
                                         assert(enteredBar);
                                         assert.strictEqual(pushedState, 1);
                                         assert.strictEqual(val, null);
+                                        assert.deepEqual(router.currentStateList, ['bar']);
                                 })
                         ).return(null).done(done);
                 });
@@ -1045,6 +1084,7 @@ describe('Router', function()
                                         assert(!enteredBar);
                                         assert.strictEqual(pushedState, 1);
                                         assert.strictEqual(val, null);
+                                        assert.deepEqual(router.currentStateList, ['foo']);
                                 }),
 
                                 router.queueEnterStates(['bar']).catch(function(err)
@@ -1054,6 +1094,7 @@ describe('Router', function()
                                         assert(enteredBar);
                                         assert.strictEqual(pushedState, 1);
                                         assert.strictEqual(err.message, 'quux');
+                                        assert.deepEqual(router.currentStateList, ['foo']);
                                 })
                         ).return(null).done(done);
                 });
