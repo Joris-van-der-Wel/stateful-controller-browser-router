@@ -334,6 +334,28 @@ describe('Router', function()
                         }).done(done);
                 });
 
+                it('should fire `transitionComplete` after the state transition', function()
+                {
+                        var firedEvent = false;
+                        windowStub.history.pushState = function(state, title, url)
+                        {
+                        };
+
+                        router.on('transitionComplete', function(stateList, url)
+                        {
+                                assert.deepEqual(stateList, ['foo']);
+                                assert.strictEqual(url, '/foo/bar');
+                                assert.deepEqual(router.currentStateList, ['foo']);
+                                firedEvent = true;
+                        });
+
+                        router.enterStates(['foo']).then(function(val)
+                        {
+                                assert(enteredFoo);
+                                assert(firedEvent);
+                        }).done(done);
+                });
+
                 it('should use replaceHistory (second argument) after the state transition', function()
                 {
                         windowStub.history.replaceState = function(state, title, url)
@@ -684,6 +706,79 @@ describe('Router', function()
                         assert(!enteredFoo);
                         assert(!enteredBar);
                 });
+
+                it('should fire `transitionComplete` after the state transition', function(done)
+                {
+                        var firedEvent = 0;
+
+                        urlStateMap.toURL = function(states)
+                        {
+                                if (states.length === 1)
+                                {
+                                        switch(states[0])
+                                        {
+                                                case 'foo': return '/foo';
+                                                case 'bar': return '/bar';
+                                                case 'baz': return '/baz';
+                                        }
+                                }
+
+                                throw Error('Should not occur in this test case');
+                        };
+
+                        windowStub.history.pushState = function() {};
+
+                        front.enterFoo = function(state, upgrade)
+                        {
+                                assert.strictEqual(firedEvent, 0);
+                        };
+
+                        front.enterBar = function(state, upgrade)
+                        {
+                                assert.strictEqual(firedEvent, 1);
+                        };
+
+                        router.on('transitionComplete', function(stateList, url)
+                        {
+                                if (firedEvent === 0)
+                                {
+                                        assert.deepEqual(stateList, ['foo']);
+                                        assert.strictEqual(url, '/foo');
+                                        assert.deepEqual(router.currentStateList, ['foo']);
+                                        ++firedEvent;
+                                }
+                                else if (firedEvent === 1)
+                                {
+                                        assert.deepEqual(stateList, ['bar']);
+                                        assert.strictEqual(url, '/bar');
+                                        assert.deepEqual(router.currentStateList, ['bar']);
+                                        ++firedEvent;
+                                }
+                                else
+                                {
+                                        throw Error('Should not occur in this test case');
+                                }
+                        });
+
+                        Promise.join(
+                                router.queueEnterStates(['foo']).then(function(val)
+                                {
+                                        assert(firedEvent, 1);
+                                }),
+
+                                router.queueEnterStates(['baz']).then(function(val)
+                                {
+                                        // entering baz has been overwritten by entering bar, however this promise should still resolve
+
+                                        assert(firedEvent, 2);
+                                }),
+
+                                router.queueEnterStates(['bar']).then(function(val)
+                                {
+                                        assert(firedEvent, 2);
+                                })
+                        ).return(null).done(done);
+                });
         });
 
         describe('onpopstate', function()
@@ -741,6 +836,42 @@ describe('Router', function()
 
                         router.attachPopStateListener();
                         assert(typeof popStateEventHandler === 'function');
+
+                        popStateEventHandler({ state: {
+                                statefulControllerRouterUrl: {
+                                        url: '/qwerty'
+                                }
+                        }});
+                });
+
+                it('should fire `transitionComplete` after the state transition', function(done)
+                {
+                        var firedEvent = false;
+                        urlStateMap.fromURL = function(path)
+                        {
+                                if (path === '/qwerty')
+                                {
+                                        return ['baz'];
+                                }
+
+                                throw Error('Should not occur in this test case');
+                        };
+
+                        router.on('transitionComplete', function(stateList, url)
+                        {
+                                assert.deepEqual(stateList, ['baz']);
+                                assert.strictEqual(url, '/qwerty');
+                                assert.deepEqual(router.currentStateList, ['baz']);
+                                firedEvent = true;
+                                done();
+                        });
+
+                        front.enterBaz = function(state, upgrade)
+                        {
+                                assert(!firedEvent);
+                        };
+
+                        router.attachPopStateListener();
 
                         popStateEventHandler({ state: {
                                 statefulControllerRouterUrl: {
