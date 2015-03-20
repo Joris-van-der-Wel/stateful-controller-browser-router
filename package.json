@@ -1,0 +1,69 @@
+{
+  "name": "stateful-controller-browser-router",
+  "version": "1.0.0",
+  "description": "A client-side router for stateful-controller using the history API",
+  "main": "lib/Router.js",
+  "scripts": {
+    "test": "istanbul cover node_modules/mocha/bin/_mocha",
+    "posttest": "jshint lib/Router.js test/Router.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Joris-van-der-Wel/stateful-controller-browser-router.git"
+  },
+  "keywords": [
+    "async",
+    "browser",
+    "browserify",
+    "controller",
+    "domv",
+    "mvc",
+    "promise",
+    "state",
+    "stateful",
+    "router",
+    "routing",
+    "history",
+    "html5",
+    "pushstate"
+  ],
+  "author": "Joris van der Wel <joris@jorisvanderwel.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Joris-van-der-Wel/stateful-controller-browser-router/issues"
+  },
+  "homepage": "https://github.com/Joris-van-der-Wel/stateful-controller-browser-router",
+  "jshintConfig": {
+    "node": true,
+    "bitwise": true,
+    "camelcase": true,
+    "curly": true,
+    "eqeqeq": true,
+    "forin": true,
+    "freeze": true,
+    "immed": true,
+    "indent": 8,
+    "latedef": true,
+    "newcap": true,
+    "noarg": true,
+    "nonbsp": true,
+    "nonew": true,
+    "quotmark": "single",
+    "undef": true,
+    "unused": "vars",
+    "strict": true,
+    "laxbreak": true,
+    "predef": [
+      "-Promise"
+    ]
+  },
+  "devDependencies": {
+    "istanbul": "^0.3.8",
+    "mocha": "^2.2.1",
+    "stateful-controller": "0.0.3"
+  },
+  "dependencies": {
+    "bluebird": "^2.9.14",
+    "inherits": "^2.0.1"
+  }
+}
